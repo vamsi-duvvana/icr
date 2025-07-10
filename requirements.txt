@@ -3,3 +3,4 @@ pytesseract
 requests
 numpy
 Pillow
+openai
