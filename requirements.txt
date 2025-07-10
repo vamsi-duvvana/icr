@@ -4,3 +4,4 @@ openai
 pillow
 requests
 pdf2image
+opencv-python
