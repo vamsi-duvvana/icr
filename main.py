@@ -2,6 +2,19 @@ import streamlit as st
 import base64
 import requests
 import json
+import pytesseract
+from PIL import Image
+
+def extract_text_from_image(image):
+    """
+    Extract text from an image using Tesseract OCR.
+    """
+    try:
+        extracted_text = pytesseract.image_to_string(image)
+        return extracted_text
+    except Exception as e:
+        st.error(f"Error extracting text from image: {e}")
+        return None
 
 # API URL input
 api_url = st.text_input(
@@ -19,9 +32,20 @@ uploaded_file = st.file_uploader("Upload a handwritten note image", type=["jpg",
 
 if uploaded_file:
     # Display uploaded image
-    st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
+    st.image(uploaded_file, caption="Uploaded Image", use_container_width=True)  # updated parameter
+
+    # Convert uploaded file to PIL Image for pytesseract
+    image = Image.open(uploaded_file)
+
+    # need to use pytesseract to extract text from the image
+    extracted_text = extract_text_from_image(image)
+
+    # Show extracted text in the UI
+    st.subheader("🔍 Extracted Text (OCR)")
+    st.code(extracted_text if extracted_text else "[No text extracted]", language="text")
 
     # Convert image to base64
+    uploaded_file.seek(0)  # Reset file pointer after PIL read
     base64_image = base64.b64encode(uploaded_file.read()).decode("utf-8")
     mime_type = uploaded_file.type  # e.g., "image/jpeg"
 
@@ -38,7 +62,7 @@ if uploaded_file:
                 "content": [
                     {
                         "type": "text",
-                        "text": "Please analyze the attached handwritten note and convert its content into JSON. Maintain a clean structure with keys like 'title', 'body', etc."
+                        "text": "Please analyze the attached handwritten note and convert its content into JSON. Maintain a clean structure with keys like 'title', 'body', etc.\n\nAdditionally, here is the text extracted from the image using OCR (pytesseract). Use this as context to improve your understanding:\n\n" + (extracted_text if extracted_text else "[No text extracted]")
                     },
                     {
                         "type": "image_url",

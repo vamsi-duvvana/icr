@@ -2,3 +2,5 @@ streamlit
 pytesseract
 openai
 pillow
+requests
+pdf2image
